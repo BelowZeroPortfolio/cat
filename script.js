@@ -55,11 +55,20 @@ function handleNoAttempt(e) {
     const size = sizes[sizeIndex] + (Math.random() * randomVariation * 2 - randomVariation);
     sadCat.style.width = size + 'px';
     
-    // Random position
-    const x = Math.random() * (window.innerWidth - size);
-    const y = Math.random() * (window.innerHeight - size);
-    sadCat.style.left = x + 'px';
-    sadCat.style.top = y + 'px';
+    // Balanced random position - divide screen into grid
+    const gridCols = 3;
+    const gridRows = 3;
+    const cellWidth = window.innerWidth / gridCols;
+    const cellHeight = window.innerHeight / gridRows;
+    
+    const gridIndex = (attemptCount - 1) % (gridCols * gridRows);
+    const col = gridIndex % gridCols;
+    const row = Math.floor(gridIndex / gridCols);
+    
+    const x = col * cellWidth + Math.random() * (cellWidth - size);
+    const y = row * cellHeight + Math.random() * (cellHeight - size);
+    sadCat.style.left = Math.max(0, Math.min(window.innerWidth - size, x)) + 'px';
+    sadCat.style.top = Math.max(0, Math.min(window.innerHeight - size, y)) + 'px';
     
     // Random rotation
     const rotation = Math.random() * 60 - 30;
@@ -126,15 +135,21 @@ yesBtn.addEventListener('click', () => {
     celebrateWithConfetti();
 });
 
-// Create 5 random happy cat gifs
+// Create 10 random happy cat gifs
 function createRandomHappyCats() {
-    const catCount = 10;
     const isMobile = window.innerWidth < 768;
+    const catCount = isMobile ? 8 : 10; // Fewer cats on mobile
     
-    // Adjust sizes based on screen size
+    // Adjust sizes based on screen size - bigger on mobile
     const sizes = isMobile 
-        ? [120, 180, 250, 200, 280] 
+        ? [150, 200, 280, 220, 320] 
         : [200, 300, 450, 350, 500];
+    
+    // Divide screen into grid for balanced placement
+    const gridCols = isMobile ? 3 : 4;
+    const gridRows = isMobile ? 3 : 3;
+    const cellWidth = window.innerWidth / gridCols;
+    const cellHeight = window.innerHeight / gridRows;
     
     for (let i = 0; i < catCount; i++) {
         setTimeout(() => {
@@ -148,10 +163,14 @@ function createRandomHappyCats() {
             const size = sizes[sizeIndex] + (Math.random() * randomVariation * 2 - randomVariation);
             cat.style.width = size + 'px';
             
-            // Random position (can go off screen a bit for more chaos)
-            const x = Math.random() * window.innerWidth - size / 2;
-            const y = Math.random() * window.innerHeight - size / 2;
-            const edgeBuffer = isMobile ? -30 : -50;
+            // Balanced position using grid
+            const gridIndex = i % (gridCols * gridRows);
+            const col = gridIndex % gridCols;
+            const row = Math.floor(gridIndex / gridCols);
+            
+            const x = col * cellWidth + Math.random() * (cellWidth - size);
+            const y = row * cellHeight + Math.random() * (cellHeight - size);
+            const edgeBuffer = isMobile ? -20 : -50;
             cat.style.left = Math.max(edgeBuffer, Math.min(window.innerWidth - size - edgeBuffer, x)) + 'px';
             cat.style.top = Math.max(edgeBuffer, Math.min(window.innerHeight - size - edgeBuffer, y)) + 'px';
             
@@ -163,7 +182,7 @@ function createRandomHappyCats() {
             cat.style.animationDelay = (Math.random() * 0.3) + 's';
             
             document.body.appendChild(cat);
-        }, i * 300); // Slower stagger (was 120ms, now 300ms)
+        }, i * (isMobile ? 250 : 300)); // Faster on mobile
     }
 }
 
